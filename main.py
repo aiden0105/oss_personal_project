@@ -50,11 +50,21 @@ class Minesweeper:
     def open_cell(self, x, y):
         if not self.flags[x][y]:  # 깃발이 없는 칸만 열기
             self.grid[x][y] = 1  # 칸 상태를 열림으로 변경
+            if self.adjacent[x][y] == 0:
+                self.open_adjacent_cells(x, y)  # 인접 칸 자동 열기
 
     # 깃발 상태를 토글하는 함수
     def toggle_flag(self, x, y):
         if not self.grid[x][y]:  # 칸이 닫혀 있는 경우만 깃발 상태 변경 가능
             self.flags[x][y] = not self.flags[x][y]
+
+    # 지정된 위치의 인접 칸을 자동으로 여는 함수
+    def open_adjacent_cells(self, x, y):
+        for dx in [-1, 0, 1]:
+            for dy in [-1, 0, 1]:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE and not self.grid[nx][ny]:
+                    self.open_cell(nx, ny)
 
 if __name__ == "__main__":
     game = Minesweeper()
