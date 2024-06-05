@@ -76,23 +76,29 @@ class Minesweeper:
 
     # 게임 보드 그리기 함수
     def draw_board(self):
-    # 게임 보드 그리기
-    for x in range(GRID_SIZE):
-        for y in range(GRID_SIZE):
-            rect = pygame.Rect(x * (SCREEN_WIDTH // GRID_SIZE), y * (SCREEN_HEIGHT // GRID_SIZE),
-                               SCREEN_WIDTH // GRID_SIZE, SCREEN_HEIGHT // GRID_SIZE)
-            if self.grid[x][y] == 1:
-                if self.mines[x][y]:
-                    pygame.draw.rect(self.screen, (255, 0, 0), rect)  # 지뢰가 있는 칸은 빨간색으로 표시
+        for x in range(GRID_SIZE):
+            for y in range(GRID_SIZE):
+                rect = pygame.Rect(x * (SCREEN_WIDTH // GRID_SIZE), y * (SCREEN_HEIGHT // GRID_SIZE),
+                                   SCREEN_WIDTH // GRID_SIZE, SCREEN_HEIGHT // GRID_SIZE)
+                if self.grid[x][y] == 1:
+                    if self.mines[x][y]:
+                        pygame.draw.rect(self.screen, (255, 0, 0), rect)  # 지뢰가 있는 칸은 빨간색으로 표시
+                    else:
+                        pygame.draw.rect(self.screen, (255, 255, 255), rect)  # 안전한 칸은 흰색으로 표시
+                        if self.adjacent[x][y] > 0:
+                            label = self.font.render(str(self.adjacent[x][y]), True, (0, 0, 0))
+                            self.screen.blit(label, rect.topleft)  # 인접 지뢰 수를 표시
                 else:
-                    pygame.draw.rect(self.screen, (255, 255, 255), rect)  # 안전한 칸은 흰색으로 표시
-                    if self.adjacent[x][y] > 0:
-                        label = self.font.render(str(self.adjacent[x][y]), True, (0, 0, 0))
-                        self.screen.blit(label, rect.topleft)  # 인접 지뢰 수를 표시
-            else:
-                pygame.draw.rect(self.screen, (160, 160, 160), rect)  # 닫힌 칸은 회색으로 표시
-                if self.flags[x][y]:
-                    pygame.draw.circle(self.screen, (0, 0, 255), (rect.centerx, rect.centery), 10)  # 깃발이 있는 칸에는 파란색 원을 표시
+                    pygame.draw.rect(self.screen, (160, 160, 160), rect)  # 닫힌 칸은 회색으로 표시
+                    if self.flags[x][y]:
+                        pygame.draw.circle(self.screen, (0, 0, 255), (rect.centerx, rect.centery), 10)  # 깃발이 있는 칸에는 파란색 원을 표시
+        if self.game_over:
+            message = self.font.render("Game Over! You hit a mine.", True, (255, 0, 0))
+            self.screen.blit(message, (SCREEN_WIDTH / 2 - message.get_width() / 2, SCREEN_HEIGHT / 2))
+
+        if self.victory:
+            message = self.font.render("You Won! All safe squares revealed.", True, (0, 255, 0))
+            self.screen.blit(message, (SCREEN_WIDTH / 2 - message.get_width() / 2, SCREEN_HEIGHT / 2))
         
     # 게임 실행 함수 업데이트
     def run(self):
@@ -107,6 +113,9 @@ class Minesweeper:
             self.draw_board()  # 게임 보드를 그림
             pygame.display.flip()  # 화면을 업데이트
             self.clock.tick(30)  # 프레임 속도 조절
+        if self.game_over or self.victory:
+            pygame.time.wait(5000)  # 5초 동안 메세지 표시 및 게임 종료
+            break
 
 if __name__ == "__main__":
     game = Minesweeper()
