@@ -23,6 +23,10 @@ class Score:
         self.opened_cells += 1
         self.score += 3
 
+    # 깃발 우클릭시 점수 업데이트
+    def update_score_for_flag(self, flag_set):
+        self.score -= 1 if flag_set else 1
+
     # 게임 오버시 점수 감소
     def apply_game_over_penalty(self):
         self.score -= 20
@@ -156,7 +160,7 @@ class Minesweeper:
     def toggle_flag(self, x, y):
         if not self.grid[x][y]:
             self.flags[x][y] = not self.flags[x][y]
-            self.scoreboard.update_score(-1 if self.flags[x][y] else 1)  # 우클릭 사용시 -1점
+            self.scoreboard.update_score_for_flag(self.flags[x][y])  # 우클릭 사용시 점수 업데이트
 
 
     # 게임 보드 그리기 함수
