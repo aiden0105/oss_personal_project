@@ -47,13 +47,26 @@ class Minesweeper:
                 self.open_cell(x, y)
             elif event.button == 3:  # 오른쪽 클릭
                 self.toggle_flag(x, y)
+                
+    # 게임 종료 조건을 검사하는 함수
+    def check_game_over(self):
+        # 모든 칸을 검사하여 지뢰를 열었는지 확인
+        for x in range(GRID_SIZE):
+            for y in range(GRID_SIZE):
+                if self.grid[x][y] == 1 and self.mines[x][y]:  # 열린 칸에 지뢰가 있는 경우
+                    self.game_over = True
+                    return True
+        return False
 
     # 지정된 위치의 칸을 여는 함수
     def open_cell(self, x, y):
-        if not self.flags[x][y]:  # 깃발이 없는 칸만 열기
+        if not self.flags[x][y] and not self.grid[x][y]:  # 깃발이 없고 닫힌 칸인 경우
             self.grid[x][y] = 1  # 칸 상태를 열림으로 변경
-            if self.adjacent[x][y] == 0:
+            if self.mines[x][y]:
+                self.game_over = True  # 게임 종료 설정
+            elif self.adjacent[x][y] == 0:
                 self.open_adjacent_cells(x, y)  # 인접 칸 자동 열기
+            self.check_game_over()  # 게임 종료 조건 검사
 
     # 깃발 상태를 토글하는 함수
     def toggle_flag(self, x, y):
@@ -86,16 +99,18 @@ class Minesweeper:
                         
     # 게임 실행 함수 업데이트
     def run(self):
-        running = True
-        while running:
+        self.game_over = False
+        while not self.game_over:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    break
                 else:
                     self.handle_mouse_input(event)  # 마우스 이벤트 처리
-            
+
             self.screen.fill((0, 0, 0))  # 화면을 검은색으로 초기화
             self.draw_board()  # 게임 보드 그리기
+            if self.game_over:
+                print("Game Over!")  # 게임 종료 메시지 출력
             pygame.display.flip()  # 변경된 내용 화면에 업데이트
 
 if __name__ == "__main__":
