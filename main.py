@@ -1,7 +1,7 @@
 import pygame
 import random
 
-# 게임 설정
+# 게임 설정: 화면 크기, 격자 크기 및 지뢰 수 설정
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 GRID_SIZE = 20
@@ -13,13 +13,30 @@ class Minesweeper:
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Minesweeper")
         self.clock = pygame.time.Clock()
+        self.font = pygame.font.Font(None, 36)  # 폰트 설정 추가
         self.reset()
-        self.flags = [[False] * GRID_SIZE for _ in range(GRID_SIZE)]  # 깃발 상태 저장 배열
 
-
+    # 모든 게임 필드 초기화
     def reset(self):
-        self.grid = [[0]*GRID_SIZE for _ in range(GRID_SIZE)]
-        
+        self.mines = [[False] * GRID_SIZE for _ in range(GRID_SIZE)]
+        self.adjacent = [[0] * GRID_SIZE for _ in range(GRID_SIZE)]
+        self.flags = [[False] * GRID_SIZE for _ in range(GRID_SIZE)]
+        self.grid = [[0] * GRID_SIZE for _ in range(GRID_SIZE)]
+        self.game_over = False
+        self.victory = False
+        self.place_mines()
+                        
+    # 지뢰를 게임 보드에 무작위로 배치하는 함수
+    def place_mines(self):
+        placed = 0
+        while placed < MINE_COUNT:
+            x = random.randint(0, GRID_SIZE - 1)
+            y = random.randint(0, GRID_SIZE - 1)
+            if not self.mines[x][y]:
+                self.mines[x][y] = True
+                self.increment_adjacent(x, y)  # 인접 칸 지뢰 수 증가
+                placed += 1
+
     # 주어진 위치 주변의 지뢰 수를 증가시키는 함수
     def increment_adjacent(self, x, y):
         for dx in [-1, 0, 1]:
@@ -28,50 +45,22 @@ class Minesweeper:
                 if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE:
                     self.adjacent[nx][ny] += 1
                     
-    # 지뢰를 게임 보드에 무작위로 배치하는 함수
-    def place_mines(self):
-        placed = 0
-        while placed < MINE_COUNT:
-            x = random.randint(0, GRID_SIZE-1)
-            y = random.randint(0, GRID_SIZE-1)
-            if not self.mines[x][y]:
-                self.mines[x][y] = True
-                self.increment_adjacent(x, y)    # 인접 지뢰 수 업데이트 호출
-                placed += 1
-
     # 마우스 입력 처리 함수
     def handle_mouse_input(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            x, y = event.pos[0] // (SCREEN_WIDTH // GRID_SIZE), event.pos[1] // (SCREEN_HEIGHT // GRID_SIZE)
-            if event.button == 1:  # 왼쪽 클릭
-                self.open_cell(x, y)
-            elif event.button == 3:  # 오른쪽 클릭
-                self.toggle_flag(x, y)
-                
-    # 게임 종료 조건을 검사하는 함수
-    def check_game_over(self):
-        # 모든 칸을 검사하여 지뢰를 열었는지 확인
-        for x in range(GRID_SIZE):
-            for y in range(GRID_SIZE):
-                if self.grid[x][y] == 1 and self.mines[x][y]:  # 열린 칸에 지뢰가 있는 경우
-                    self.game_over = True
-                    return True
-        return False
+        x, y = event.pos[0] // (SCREEN_WIDTH // GRID_SIZE), event.pos[1] // (SCREEN_HEIGHT // GRID_SIZE)
+        if event.button == 1 and not self.flags[x][y]:  # 왼쪽 클릭 처리
+            self.open_cell(x, y)
+        elif event.button == 3 and not self.grid[x][y]:  # 오른쪽 클릭 처리
+            self.toggle_flag(x, y)
 
     # 지정된 위치의 칸을 여는 함수
     def open_cell(self, x, y):
-        if not self.flags[x][y] and not self.grid[x][y]:  # 깃발이 없고 닫힌 칸인 경우
-            self.grid[x][y] = 1  # 칸 상태를 열림으로 변경
+        if not self.grid[x][y]:
+            self.grid[x][y] = 1
             if self.mines[x][y]:
-                self.game_over = True  # 게임 종료 설정
+                self.game_over = True
             elif self.adjacent[x][y] == 0:
-                self.open_adjacent_cells(x, y)  # 인접 칸 자동 열기
-            self.check_game_over()  # 게임 종료 조건 검사
-
-    # 깃발 상태를 토글하는 함수
-    def toggle_flag(self, x, y):
-        if not self.grid[x][y]:  # 칸이 닫혀 있는 경우만 깃발 상태 변경 가능
-            self.flags[x][y] = not self.flags[x][y]
+                self.open_adjacent_cells(x, y)  # 인접한 칸 자동으로 열기
 
     # 지정된 위치의 인접 칸을 자동으로 여는 함수
     def open_adjacent_cells(self, x, y):
@@ -81,48 +70,44 @@ class Minesweeper:
                 if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE and not self.grid[nx][ny]:
                     self.open_cell(nx, ny)
 
+    # 깃발 상태를 토글하는 함수
+    def toggle_flag(self, x, y):
+        self.flags[x][y] = not self.flags[x][y]
+
     # 게임 보드 그리기 함수
     def draw_board(self):
-        for x in range(GRID_SIZE):
-            for y in range(GRID_SIZE):
-                rect = pygame.Rect(x * (SCREEN_WIDTH // GRID_SIZE), y * (SCREEN_HEIGHT // GRID_SIZE), 
-                                   SCREEN_WIDTH // GRID_SIZE, SCREEN_HEIGHT // GRID_SIZE)
-                if self.grid[x][y] == 1:  # 칸이 열렸다면
-                    pygame.draw.rect(self.screen, (255, 255, 255), rect)  # 백색으로 칸 채우기
-                    if self.adjacent[x][y] > 0:  # 인접 지뢰 수가 있다면 숫자 표시
+    # 게임 보드 그리기
+    for x in range(GRID_SIZE):
+        for y in range(GRID_SIZE):
+            rect = pygame.Rect(x * (SCREEN_WIDTH // GRID_SIZE), y * (SCREEN_HEIGHT // GRID_SIZE),
+                               SCREEN_WIDTH // GRID_SIZE, SCREEN_HEIGHT // GRID_SIZE)
+            if self.grid[x][y] == 1:
+                if self.mines[x][y]:
+                    pygame.draw.rect(self.screen, (255, 0, 0), rect)  # 지뢰가 있는 칸은 빨간색으로 표시
+                else:
+                    pygame.draw.rect(self.screen, (255, 255, 255), rect)  # 안전한 칸은 흰색으로 표시
+                    if self.adjacent[x][y] > 0:
                         label = self.font.render(str(self.adjacent[x][y]), True, (0, 0, 0))
-                        self.screen.blit(label, (rect.x + 10, rect.y + 10))
-                else:  # 칸이 닫혀 있으면
-                    pygame.draw.rect(self.screen, (160, 160, 160), rect)  # 회색으로 칸 채우기
-                    if self.flags[x][y]:  # 깃발이 있다면 깃발 표시
-                        pygame.draw.circle(self.screen, (255, 0, 0), (rect.x + rect.width // 2, rect.y + rect.height // 2), 10)
-
-    # 모든 안전한 칸이 열렸는지 확인하는 함수
-    def check_victory(self):
-        for x in range(GRID_SIZE):
-            for y in range(GRID_SIZE):
-                if not self.mines[x][y] and self.grid[x][y] == 0:  # 지뢰가 아니며 아직 열리지 않은 칸이 있다면
-                    return False  # 아직 승리하지 않음
-        self.victory = True  # 모든 안전한 칸이 열렸다면 승리 설정
-        return True
+                        self.screen.blit(label, rect.topleft)  # 인접 지뢰 수를 표시
+            else:
+                pygame.draw.rect(self.screen, (160, 160, 160), rect)  # 닫힌 칸은 회색으로 표시
+                if self.flags[x][y]:
+                    pygame.draw.circle(self.screen, (0, 0, 255), (rect.centerx, rect.centery), 10)  # 깃발이 있는 칸에는 파란색 원을 표시
         
     # 게임 실행 함수 업데이트
     def run(self):
-        self.victory = False
         while not self.game_over and not self.victory:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    break
-                else:
-                    self.handle_mouse_input(event)  # 마우스 이벤트 처리
-
-            self.screen.fill((0, 0, 0))  # 화면을 검은색으로 초기화
-            self.draw_board()  # 게임 보드 그리기
-            if self.check_game_over():  # 게임 종료 조건 검사
-                print("Game Over! You hit a mine.")  # 지뢰 클릭 시 패배 메시지 출력
-            if self.check_victory():  # 승리 조건 검사
-                print("You Won! All safe squares revealed.")  # 모든 안전한 칸을 열었을 때 승리 메시지 출력
-            pygame.display.flip()  # 변경된 내용 화면에 업데이트
+                    pygame.quit()
+                    return
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    self.handle_mouse_input(event)
+            self.screen.fill((0, 0, 0))  # 화면을 검은색으로 채움
+            self.draw_board()  # 게임 보드를 그림
+            pygame.display.flip()  # 화면을 업데이트
+            self.clock.tick(30)  # 프레임 속도 조절
 
 if __name__ == "__main__":
     game = Minesweeper()
+    game.run()
