@@ -68,6 +68,22 @@ class Minesweeper:
                 if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE and not self.grid[nx][ny]:
                     self.open_cell(nx, ny)
 
+    # 게임 보드 그리기 함수
+    def draw_board(self):
+        for x in range(GRID_SIZE):
+            for y in range(GRID_SIZE):
+                rect = pygame.Rect(x * (SCREEN_WIDTH // GRID_SIZE), y * (SCREEN_HEIGHT // GRID_SIZE), 
+                                   SCREEN_WIDTH // GRID_SIZE, SCREEN_HEIGHT // GRID_SIZE)
+                if self.grid[x][y] == 1:  # 칸이 열렸다면
+                    pygame.draw.rect(self.screen, (255, 255, 255), rect)  # 백색으로 칸 채우기
+                    if self.adjacent[x][y] > 0:  # 인접 지뢰 수가 있다면 숫자 표시
+                        label = self.font.render(str(self.adjacent[x][y]), True, (0, 0, 0))
+                        self.screen.blit(label, (rect.x + 10, rect.y + 10))
+                else:  # 칸이 닫혀 있으면
+                    pygame.draw.rect(self.screen, (160, 160, 160), rect)  # 회색으로 칸 채우기
+                    if self.flags[x][y]:  # 깃발이 있다면 깃발 표시
+                        pygame.draw.circle(self.screen, (255, 0, 0), (rect.x + rect.width // 2, rect.y + rect.height // 2), 10)
+                        
     # 게임 실행 함수 업데이트
     def run(self):
         running = True
@@ -77,6 +93,10 @@ class Minesweeper:
                     running = False
                 else:
                     self.handle_mouse_input(event)  # 마우스 이벤트 처리
+            
+            self.screen.fill((0, 0, 0))  # 화면을 검은색으로 초기화
+            self.draw_board()  # 게임 보드 그리기
+            pygame.display.flip()  # 변경된 내용 화면에 업데이트
 
 if __name__ == "__main__":
     game = Minesweeper()
