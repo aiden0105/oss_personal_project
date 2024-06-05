@@ -14,6 +14,8 @@ class Minesweeper:
         pygame.display.set_caption("Minesweeper")
         self.clock = pygame.time.Clock()
         self.reset()
+        self.flags = [[False] * GRID_SIZE for _ in range(GRID_SIZE)]  # 깃발 상태 저장 배열
+
 
     def reset(self):
         self.grid = [[0]*GRID_SIZE for _ in range(GRID_SIZE)]
@@ -65,6 +67,16 @@ class Minesweeper:
                 nx, ny = x + dx, y + dy
                 if 0 <= nx < GRID_SIZE and 0 <= ny < GRID_SIZE and not self.grid[nx][ny]:
                     self.open_cell(nx, ny)
+
+    # 게임 실행 함수 업데이트
+    def run(self):
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                else:
+                    self.handle_mouse_input(event)  # 마우스 이벤트 처리
 
 if __name__ == "__main__":
     game = Minesweeper()
