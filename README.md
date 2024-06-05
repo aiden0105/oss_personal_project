@@ -58,14 +58,13 @@ pip3 install ~~~ // 추가예정
 python main.py로 실행시 아래와 같이 난이도 선택 기능 활성화
 프롬프트 창에서 1 or 2 or 3 입력으로 해당 난이도의 지뢰찾기 게임 시작
 
-[Easy 난이도 보드판]
-
 <img width="399" alt="1" src="https://github.com/aiden0105/oss_personal_project/assets/54185322/8bdad159-1aa3-4991-ae84-09b2b3fb5cd2">
 
 [Hard 난이도 보드판]
 
 <img width="601" alt="3" src="https://github.com/aiden0105/oss_personal_project/assets/54185322/6a089cc7-6a37-43ec-93cf-cf2b7270017d">
 
+[Easy 난이도 패배/승리 예시]
 
 ![mine](https://github.com/aiden0105/oss_personal_project/assets/54185322/1c4206d8-1edc-4c15-8c1f-01e3d2d3ecbe)
 
