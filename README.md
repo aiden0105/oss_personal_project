@@ -1,10 +1,9 @@
 # oss_personal_project
 
 # 구현 목표
-###  본 프로젝트는 ~~~
+###  본 프로젝트는 제리맥 래티프가 개발한 '큐브'(Jerimac Ratliff's Cube)라는 게임이 원형으로 여겨지는 Microsoft Windows의 기본 게임 중 하나인 지뢰찾기(Minesweeper)를 pygame으로 구현하는 것이 목표이다. 지뢰찾기에서 지뢰는 무작위로 배치되고, 게임의 핵심 로직은 사용자의 마우스 좌클릭으로 칸을 열거나 우클릭 깃발을 표시하는 것이다. 지뢰가 있는 칸을 열면 게임에서 패배하게 되며, 게임의 승리 조건은 모든 지뢰가 아닌 칸을 여는 것이다.
 
 # 구현 기능
-
 * pygame, box2d 기반 게임 board(환경) 구현
 
 # Reference
@@ -50,7 +49,7 @@ pip3 install pygame
 pip3 install ~~~ // 추가예정
 ```
 
-5. 재부팅 이후 python3 main.py를 실행하면 게임 창이 뜨면서 실행됨.
+5. 재부팅 이후 python main.py를 실행하면 게임 창이 뜨면서 실행됨. (현재 환경에서 python3 main.py가 작동하지 않아 python main.py로 구동함)
 
 
 # 실행 예시
