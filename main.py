@@ -101,6 +101,7 @@ class Minesweeper:
             self.screen.blit(message, (SCREEN_WIDTH / 2 - message.get_width() / 2, SCREEN_HEIGHT / 2))
         
     # 게임 실행 함수 업데이트
+    # 게임 실행 함수 업데이트
     def run(self):
         while not self.game_over and not self.victory:
             for event in pygame.event.get():
@@ -113,9 +114,10 @@ class Minesweeper:
             self.draw_board()  # 게임 보드를 그림
             pygame.display.flip()  # 화면을 업데이트
             self.clock.tick(30)  # 프레임 속도 조절
-        if self.game_over or self.victory:
-            pygame.time.wait(5000)  # 5초 동안 메세지 표시 및 게임 종료
-            break
+            if self.game_over or self.victory:
+                pygame.time.wait(5000)  # 5초 동안 메세지 표시 및 게임 종료
+                break  # break가 while loop 안에 정상적으로 배치되도록 수정
+
 
 if __name__ == "__main__":
     game = Minesweeper()
