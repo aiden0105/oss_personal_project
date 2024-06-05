@@ -96,11 +96,20 @@ class Minesweeper:
                     pygame.draw.rect(self.screen, (160, 160, 160), rect)  # 회색으로 칸 채우기
                     if self.flags[x][y]:  # 깃발이 있다면 깃발 표시
                         pygame.draw.circle(self.screen, (255, 0, 0), (rect.x + rect.width // 2, rect.y + rect.height // 2), 10)
-                        
+
+    # 모든 안전한 칸이 열렸는지 확인하는 함수
+    def check_victory(self):
+        for x in range(GRID_SIZE):
+            for y in range(GRID_SIZE):
+                if not self.mines[x][y] and self.grid[x][y] == 0:  # 지뢰가 아니며 아직 열리지 않은 칸이 있다면
+                    return False  # 아직 승리하지 않음
+        self.victory = True  # 모든 안전한 칸이 열렸다면 승리 설정
+        return True
+        
     # 게임 실행 함수 업데이트
     def run(self):
-        self.game_over = False
-        while not self.game_over:
+        self.victory = False
+        while not self.game_over and not self.victory:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     break
@@ -109,8 +118,10 @@ class Minesweeper:
 
             self.screen.fill((0, 0, 0))  # 화면을 검은색으로 초기화
             self.draw_board()  # 게임 보드 그리기
-            if self.game_over:
-                print("Game Over!")  # 게임 종료 메시지 출력
+            if self.check_game_over():  # 게임 종료 조건 검사
+                print("Game Over! You hit a mine.")  # 지뢰 클릭 시 패배 메시지 출력
+            if self.check_victory():  # 승리 조건 검사
+                print("You Won! All safe squares revealed.")  # 모든 안전한 칸을 열었을 때 승리 메시지 출력
             pygame.display.flip()  # 변경된 내용 화면에 업데이트
 
 if __name__ == "__main__":
