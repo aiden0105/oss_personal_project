@@ -78,8 +78,8 @@ class Minesweeper:
         print("Choose difficulty: Easy (1), Medium (2), Hard (3)")
         choice = input("Enter your choice (1, 2, 3): ")
         if choice == '1':
-            self.grid_size = 7
-            self.mine_count = 10
+            self.grid_size = 8
+            self.mine_count = 7
             self.screen_width = 400
             self.screen_height = 400
             self.current_difficulty = 'easy'
