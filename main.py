@@ -46,5 +46,10 @@ class Minesweeper:
             elif event.button == 3:  # 오른쪽 클릭
                 self.toggle_flag(x, y)
 
+    # 지정된 위치의 칸을 여는 함수
+    def open_cell(self, x, y):
+        if not self.flags[x][y]:  # 깃발이 없는 칸만 열기
+            self.grid[x][y] = 1  # 칸 상태를 열림으로 변경
+
 if __name__ == "__main__":
     game = Minesweeper()
