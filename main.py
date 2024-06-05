@@ -1,4 +1,5 @@
 import pygame
+import random
 
 # 게임 설정
 SCREEN_WIDTH = 800
@@ -36,7 +37,14 @@ class Minesweeper:
                 self.increment_adjacent(x, y)    # 인접 지뢰 수 업데이트 호출
                 placed += 1
 
-
+    # 마우스 입력 처리 함수
+    def handle_mouse_input(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            x, y = event.pos[0] // (SCREEN_WIDTH // GRID_SIZE), event.pos[1] // (SCREEN_HEIGHT // GRID_SIZE)
+            if event.button == 1:  # 왼쪽 클릭
+                self.open_cell(x, y)
+            elif event.button == 3:  # 오른쪽 클릭
+                self.toggle_flag(x, y)
 
 if __name__ == "__main__":
     game = Minesweeper()
