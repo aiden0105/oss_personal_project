@@ -24,7 +24,7 @@ class Minesweeper:
         self.grid = [[0] * GRID_SIZE for _ in range(GRID_SIZE)]
         self.game_over = False
         self.victory = False
-        self.place_mines()
+        self.place_mines()  # 새 게임에 대한 지뢰를 재배치
                         
     # 지뢰를 게임 보드에 무작위로 배치하는 함수
     def place_mines(self):
@@ -99,25 +99,30 @@ class Minesweeper:
         if self.victory:
             message = self.font.render("You Won! All safe squares revealed.", True, (0, 255, 0))
             self.screen.blit(message, (SCREEN_WIDTH / 2 - message.get_width() / 2, SCREEN_HEIGHT / 2))
-        
-    # 게임 실행 함수 업데이트
-    # 게임 실행 함수 업데이트
-    def run(self):
-        while not self.game_over and not self.victory:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    return
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    self.handle_mouse_input(event)
-            self.screen.fill((0, 0, 0))  # 화면을 검은색으로 채움
-            self.draw_board()  # 게임 보드를 그림
-            pygame.display.flip()  # 화면을 업데이트
-            self.clock.tick(30)  # 프레임 속도 조절
-            if self.game_over or self.victory:
-                pygame.time.wait(5000)  # 5초 동안 메세지 표시 및 게임 종료
-                break  # break가 while loop 안에 정상적으로 배치되도록 수정
 
+    # 게임 실행 함수
+    def run(self):
+        while True:  # 게임을 계속 반복 실행할 수 있도록 무한 루프로 변경
+            while not self.game_over and not self.victory:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        return
+                    elif event.type == pygame.MOUSEBUTTONDOWN:
+                        self.handle_mouse_input(event)
+                self.screen.fill((0, 0, 0))
+                self.draw_board()
+                pygame.display.flip()
+                self.clock.tick(30)
+    
+                if self.game_over:
+                    pygame.time.wait(1000)  # 게임 오버시 1초 대기
+                    break
+                if self.victory:
+                    pygame.time.wait(5000)  # 승리시 5초 대기
+                    break
+    
+            self.reset()  # 게임 상태를 초기화하여 새 게임 시작
 
 if __name__ == "__main__":
     game = Minesweeper()
