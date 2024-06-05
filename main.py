@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 
 # 게임 설정: 화면 크기, 격자 크기 및 지뢰 수 설정
 SCREEN_WIDTH = 800
@@ -7,20 +8,47 @@ SCREEN_HEIGHT = 600
 GRID_SIZE = 20
 MINE_COUNT = 40    # 지뢰 총 개수
 
+# 게임 점수와 타이머를 구성하는 클래스
+class Score:
+    def __init__(self, font, screen, initial_score=0):
+        self.score = initial_score
+        self.start_time = time.time()
+        self.font = pygame.font.Font(None, 18)  # Using a smaller font size as previously adjusted
+        self.screen = screen
+
+    def update_score(self, points):
+        self.score += points
+
+    def display_score(self):
+        elapsed_time = int(time.time() - self.start_time)
+        # Combine score and time into one line and change text color to blue
+        score_time_text = f'Score: {self.score} | Time: {elapsed_time} sec'
+        display_text = self.font.render(score_time_text, True, (0, 0, 255))
+        # Position the text to the top center of the screen
+        text_x = (self.screen.get_width() - display_text.get_width()) / 2
+        self.screen.blit(display_text, (text_x, 10))
+
+    def reset(self):
+        self.start_time = time.time()
+        self.score = 0
+
+# 지뢰찾기 보드판을 구성하는 클래스        
 class Minesweeper:
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Minesweeper")
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font(None, 36)
+        self.font = pygame.font.Font(None, 24)
         self.choose_difficulty()
+        self.scoreboard = Score(self.font, self.screen)  # 스코어보드 초기화
         self.reset()
+
 
     # 난이도 설정 (easy, medium, hard)
     def choose_difficulty(self):
         print("Choose difficulty: Easy (1), Medium (2), Hard (3)")
-        choice = input("Enter your choice (1, 2, or 3): ")
+        choice = input("Enter your choice (1, 2, 3): ")
         if choice == '1':
             self.grid_size = 8
             self.mine_count = 10
@@ -47,6 +75,7 @@ class Minesweeper:
         self.game_over = False
         self.victory = False
         self.place_mines()
+        self.scoreboard.reset()
 
                         
     # 지뢰를 게임 보드에 무작위로 배치하는 함수
@@ -98,7 +127,10 @@ class Minesweeper:
 
     # 깃발 상태를 토글하는 함수
     def toggle_flag(self, x, y):
-        self.flags[x][y] = not self.flags[x][y]
+        if not self.grid[x][y]:
+            self.flags[x][y] = not self.flags[x][y]
+            self.scoreboard.update_score(-1 if self.flags[x][y] else 1)  # 우클릭 사용시 -1점
+
 
     # 게임 보드 그리기 함수
     def draw_board(self):
@@ -118,13 +150,26 @@ class Minesweeper:
                     pygame.draw.rect(self.screen, (160, 160, 160), rect)  # 닫힌 칸은 회색으로 표시
                     if self.flags[x][y]:
                         pygame.draw.circle(self.screen, (0, 0, 255), (rect.centerx, rect.centery), 10)  # 깃발이 있는 칸에는 파란색 원을 표시
+        
+        self.scoreboard.display_score()
+    
         if self.game_over:
-            message = self.font.render("Game Over! You hit a mine.", True, (255, 0, 0))
-            self.screen.blit(message, (SCREEN_WIDTH / 2 - message.get_width() / 2, SCREEN_HEIGHT / 2))
-
+            game_over_text = "Game Over!"
+            final_score_text = f"Final Score: {self.scoreboard.score}"
+            game_over_message = self.font.render(game_over_text, True, (255, 0, 0))
+            final_score_message = self.font.render(final_score_text, True, (255, 0, 0))
+            self.screen.blit(game_over_message, (self.screen_width / 2 - game_over_message.get_width() / 2, self.screen_height / 2 - game_over_message.get_height() / 2))
+            self.screen.blit(final_score_message, (self.screen_width / 2 - final_score_message.get_width() / 2, self.screen_height / 2 + game_over_message.get_height() / 2))
+        
         if self.victory:
-            message = self.font.render("You Won! All safe squares revealed.", True, (0, 255, 0))
-            self.screen.blit(message, (SCREEN_WIDTH / 2 - message.get_width() / 2, SCREEN_HEIGHT / 2))
+            victory_text = "You Won!"
+            final_score_text = f"Final Score: {self.scoreboard.score}"
+            victory_message = self.font.render(victory_text, True, (0, 255, 0))
+            final_score_message = self.font.render(final_score_text, True, (0, 255, 0))
+            self.screen.blit(victory_message, (self.screen_width / 2 - victory_message.get_width() / 2, self.screen_height / 2 - victory_message.get_height() / 2))
+            self.screen.blit(final_score_message, (self.screen_width / 2 - final_score_message.get_width() / 2, self.screen_height / 2 + victory_message.get_height() / 2))
+
+
 
     # 게임 실행 함수
     def run(self):
