@@ -51,5 +51,10 @@ class Minesweeper:
         if not self.flags[x][y]:  # 깃발이 없는 칸만 열기
             self.grid[x][y] = 1  # 칸 상태를 열림으로 변경
 
+    # 깃발 상태를 토글하는 함수
+    def toggle_flag(self, x, y):
+        if not self.grid[x][y]:  # 칸이 닫혀 있는 경우만 깃발 상태 변경 가능
+            self.flags[x][y] = not self.flags[x][y]
+
 if __name__ == "__main__":
     game = Minesweeper()
