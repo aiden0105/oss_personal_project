@@ -215,14 +215,14 @@ class Minesweeper:
 #########PHASE2#############
 ############################
     def start_explosion(self, x, y):
-        self.exploding_cells = [(x, y)]
-        self.explosion_start_time = time.time()
+        self.exploding_cells = [(x, y)] # exploding_cells 에 현재 cell 추가.
+        self.explosion_start_time = time.time() # exploding_start_time 설정.
 
     def update_explosion(self):
         if self.explosion_start_time:
-            self.exploded_cells.extend(self.exploding_cells)
+            self.exploded_cells.extend(self.exploding_cells) # exploging 을 완료할 cell로 exploded_cells 업데이트
             new_cells = []
-            for cell in self.exploding_cells:
+            for cell in self.exploding_cells: # exploded_cells 주변으로 exploding 전개
                 cx, cy = cell
                 for dx in [-1, 0, 1]:
                     for dy in [-1, 0, 1]:
@@ -231,8 +231,8 @@ class Minesweeper:
                             (nx, ny) not in self.exploded_cells and (nx, ny) not in new_cells):
                             new_cells.append((nx, ny))
                
-            self.exploding_cells = new_cells
-            pygame.time.wait(200)
+            self.exploding_cells = new_cells # exploding_cell 업데이트
+            pygame.time.wait(200) # 0.2 초 간격으로 반복
             if not new_cells:
                 self.explosion_start_time = None
 ############################
@@ -310,6 +310,9 @@ class Minesweeper:
                 pygame.display.flip()
                 self.clock.tick(30)
 
+            ############################
+            #########PHASE2#############
+            ############################
             if self.game_over:
                 while self.explosion_start_time is not None:
                     self.screen.fill((0, 0, 0))
@@ -320,19 +323,22 @@ class Minesweeper:
 
                 self.draw_board()
                 pygame.display.flip()
-                self.wait_for_key_press()
+                self.wait_for_key_press() # key 입력할 때까지 대기
                 self.reset()
+            ############################
+            #########PHASE2#############
+            ############################
 
             if self.victory:
                 self.scoreboard.apply_victory_bonus(self.current_difficulty)  # 승리시 난이도별 보너스 점수 적용
                 pygame.time.wait(5000)  # 승리시 5초 대기
                 self.reset()  # 게임판 리셋
 
-    # 키 입력 대기 함수
+    
 ############################
 #########PHASE2#############
 ############################
-    def wait_for_key_press(self):
+    def wait_for_key_press(self): # 키 입력 대기 함수
         waiting = True
         while waiting:
             for event in pygame.event.get():
