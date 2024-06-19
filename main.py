@@ -119,6 +119,9 @@ class Minesweeper:
         self.grid = [[0] * self.grid_size for _ in range(self.grid_size)]
         self.game_over = False
         self.victory = False
+        self.exploding_cells = []  # 폭발 애니메이션을 위한 칸 리스트
+        self.explosion_start_time = None  # 폭발 시작 시간
+        self.exploded_cells = []  # 폭발이 완료된 칸 리스트
         self.place_mines()
 ############################
 #########PHASE2#############
@@ -135,13 +138,8 @@ class Minesweeper:
                 if (self.mines[x][y] and not self.flags[x][y]) or (not self.mines[x][y] and not self.grid[x][y]):
                     return False
         self.victory = True
-############################
-#########PHASE2#############
-############################
         self.scoreboard.apply_victory_bonus(self.current_difficulty)  # 승리시 난이도별 보너스 점수 적용
-############################
-#########PHASE2#############
-############################
+
         return True
 
     # 지뢰를 게임 보드에 무작위로 배치하는 함수
@@ -177,6 +175,13 @@ class Minesweeper:
             self.grid[x][y] = 1
             if self.mines[x][y]:
                 self.game_over = True
+############################
+#########PHASE2#############
+############################
+                self.start_explosion(x, y)
+############################
+#########PHASE2#############
+############################
                 self.scoreboard.apply_game_over_penalty()
             else:
                 self.scoreboard.update_score_for_open_cell()
@@ -201,6 +206,35 @@ class Minesweeper:
 ############################
             self.scoreboard.update_score_for_flag(self.flags[x][y])  # 우클릭 사용시 점수 업데이트
             self.check_victory()  # 승리 조건 확인
+############################
+#########PHASE2#############
+############################
+
+
+############################
+#########PHASE2#############
+############################
+    def start_explosion(self, x, y):
+        self.exploding_cells = [(x, y)]
+        self.explosion_start_time = time.time()
+
+    def update_explosion(self):
+        if self.explosion_start_time:
+            self.exploded_cells.extend(self.exploding_cells)
+            new_cells = []
+            for cell in self.exploding_cells:
+                cx, cy = cell
+                for dx in [-1, 0, 1]:
+                    for dy in [-1, 0, 1]:
+                        nx, ny = cx + dx, cy + dy
+                        if (0 <= nx < self.grid_size and 0 <= ny < self.grid_size and 
+                            (nx, ny) not in self.exploded_cells and (nx, ny) not in new_cells):
+                            new_cells.append((nx, ny))
+               
+            self.exploding_cells = new_cells
+            pygame.time.wait(200)
+            if not new_cells:
+                self.explosion_start_time = None
 ############################
 #########PHASE2#############
 ############################
@@ -234,14 +268,29 @@ class Minesweeper:
 ############################
 #########PHASE2#############
 ############################
-        self.scoreboard.display_score()  # 실시간 점수 & 타이머 표시
+
+        for cell in self.exploding_cells:
+            rect = pygame.Rect(cell[0] * (self.screen_width // self.grid_size), cell[1] * (self.screen_height // self.grid_size),
+                               self.screen_width // self.grid_size, self.screen_height // self.grid_size)
+            pygame.draw.rect(self.screen, (255, 0, 0), rect)
+            pygame.draw.rect(self.screen, (0, 0, 0), rect, 1)  # 검은색 테두리 그리기
+
+        for cell in self.exploded_cells:
+            rect = pygame.Rect(cell[0] * (self.screen_width // self.grid_size), cell[1] * (self.screen_height // self.grid_size),
+                               self.screen_width // self.grid_size, self.screen_height // self.grid_size)
+            pygame.draw.rect(self.screen, (0, 0, 0), rect)
+        
 ############################
 #########PHASE2#############
 ############################
 
-        if self.game_over:
-            message = self.font.render("Game Over! " + self.scoreboard.final_message(), True, (255, 0, 0))
+        self.scoreboard.display_score()  # 실시간 점수 & 타이머 표시
+
+
+        if self.game_over and not self.explosion_start_time:
+            message = self.font.render("Game Over! Press Any Key To Restart.", True, (255, 255, 255))
             self.screen.blit(message, (self.screen_width / 2 - message.get_width() / 2, self.screen_height / 2))
+
         if self.victory:
             message = self.font.render("You Won! " + self.scoreboard.final_message(), True, (0, 255, 0))
             self.screen.blit(message, (self.screen_width / 2 - message.get_width() / 2, self.screen_height / 2))
@@ -261,20 +310,40 @@ class Minesweeper:
                 pygame.display.flip()
                 self.clock.tick(30)
 
-                if self.game_over:
-                    pygame.time.wait(1000)  # 게임 오버시 1초 대기
-                    break
-                if self.victory:
+            if self.game_over:
+                while self.explosion_start_time is not None:
+                    self.screen.fill((0, 0, 0))
+                    self.update_explosion()
+                    self.draw_board()
+                    pygame.display.flip()
+                    self.clock.tick(30)
+
+                self.draw_board()
+                pygame.display.flip()
+                self.wait_for_key_press()
+                self.reset()
+
+            if self.victory:
+                self.scoreboard.apply_victory_bonus(self.current_difficulty)  # 승리시 난이도별 보너스 점수 적용
+                pygame.time.wait(5000)  # 승리시 5초 대기
+                self.reset()  # 게임판 리셋
+
+    # 키 입력 대기 함수
 ############################
 #########PHASE2#############
 ############################
-                    self.scoreboard.apply_victory_bonus(self.current_difficulty)  # 승리시 난이도별 보너스 점수 적용
+    def wait_for_key_press(self):
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return
+                if event.type == pygame.KEYDOWN:
+                    waiting = False
 ############################
 #########PHASE2#############
 ############################
-                    pygame.time.wait(5000)  # 승리시 5초 대기
-                    break
-            self.reset()  # 게임판 리셋
 
 if __name__ == "__main__":
     game = Minesweeper()
