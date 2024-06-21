@@ -252,7 +252,23 @@ class Minesweeper:
         self.scoreboard.display_score()  # 실시간 점수 & 타이머 표시
         
         if self.game_over:
-            message = self.font.render("Game Over! " + self.scoreboard.final_message(), True, (255, 0, 0))
+
+            ####################
+            ###### PHASE2 ######
+
+            # 기능성 업데이트: 게임 오버시 폭탄 위치 노출
+            for x in range(self.grid_size):
+                for y in range(self.grid_size):
+                    if self.mines[x][y]:
+                        rect = pygame.Rect(x * (self.screen_width // self.grid_size), y * ((self.screen_height - 50) // self.grid_size), self.screen_width // self.grid_size, (self.screen_height - 50) // self.grid_size)
+                        pygame.draw.rect(self.screen, (255, 0, 0), rect)
+
+            # 비주얼 업데이트: 기능성 업데이트를 위해 글자 색상 변경
+            message = self.font.render("Game Over! " + self.scoreboard.final_message(), True, (0, 255, 0))
+
+            ###### PHASE2 ######
+            ####################
+
             self.screen.blit(message, (self.screen_width / 2 - message.get_width() / 2, self.screen_height / 2))
         if self.victory:
             message = self.font.render("You Won! " + self.scoreboard.final_message(), True, (0, 255, 0))
@@ -274,7 +290,15 @@ class Minesweeper:
                 self.clock.tick(30)
         
                 if self.game_over:
-                    pygame.time.wait(1000)  # 게임 오버시 1초 대기
+                    
+                    ####################
+                    ###### PHASE2 ######
+
+                    # 기능성 업데이트: 게임 오버 시 폭탄 위치 노출
+                    pygame.time.wait(5000)  # 게임 오버시 5초 대기
+                    
+                    ###### PHASE2 ######
+                    ####################
                     break
                 if self.victory:
                     self.scoreboard.apply_victory_bonus(self.current_difficulty)  # 승리시 난이도별 보너스 점수 적용
