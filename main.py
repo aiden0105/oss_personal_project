@@ -194,7 +194,16 @@ class Minesweeper:
                     pygame.draw.rect(self.screen, (160, 160, 160), rect)
                     if self.flags[x][y]:
                         pygame.draw.circle(self.screen, (0, 0, 255), (rect.centerx, rect.centery), 10)
-                        
+                
+                ####################
+                ###### PHASE2 ######
+
+                # 비주얼 업데이트: 검정색 테두리 추가
+                pygame.draw.rect(self.screen, (0, 0, 0), rect, 1)
+
+                ###### PHASE2 ######
+                ####################
+
         self.scoreboard.display_score()  # 실시간 점수 & 타이머 표시
         
         if self.game_over:
